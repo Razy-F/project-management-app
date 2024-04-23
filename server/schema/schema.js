@@ -7,6 +7,8 @@ import {
   GraphQLString,
 } from "graphql";
 
+import Client from "../models/Client.js";
+import Project from "../models/Project.js";
 /* ------------------------------- Client Type ------------------------------ */
 const ClientType = new GraphQLObjectType({
   name: "Client",
@@ -27,6 +29,10 @@ const ProjectType = new GraphQLObjectType({
     name: { type: GraphQLString },
     description: { type: GraphQLString },
     status: { type: GraphQLString },
+    client: {
+      type: ClientType,
+      resolve: (project) => Client.findById(parent.clientId),
+    },
   }),
 });
 
@@ -42,13 +48,13 @@ const RootQuery = new GraphQLObjectType({
       args: { id: { type: GraphQLID } },
       //where we have our return whatever we want to respond thats called resolver
       resolve(parent, args) {
-        return clients.find((client) => client.id === args.id);
+        return Client.findById(args.id);
       },
     },
     clients: {
       type: new GraphQLList(ClientType),
       description: "List of clients",
-      resolve: () => clients,
+      resolve: () => Client.find(),
     },
     project: {
       type: ProjectType,
@@ -56,13 +62,15 @@ const RootQuery = new GraphQLObjectType({
       args: { id: { type: GraphQLID } },
       //where we have our return whatever we want to respond thats called resolver
       resolve(parent, args) {
-        return projects.find((project) => project.id === args.id);
+        return Project.findById(args.id);
       },
     },
     projects: {
       type: new GraphQLList(ProjectType),
       description: "List of Projects",
-      resolve: () => projects,
+      resolve() {
+        return Project.find();
+      },
     },
   },
 });
