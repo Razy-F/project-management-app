@@ -2,6 +2,7 @@ import { projects, clients } from "../dummyData.js";
 import {
   GraphQLID,
   GraphQLList,
+  GraphQLNonNull,
   GraphQLObjectType,
   GraphQLSchema,
   GraphQLString,
@@ -75,6 +76,41 @@ const RootQuery = new GraphQLObjectType({
   },
 });
 
+/* -------------------------------- Mutation -------------------------------- */
+const mutation = new GraphQLObjectType({
+  name: "Mutation",
+  description: "Mutation section",
+  fields: {
+    addClient: {
+      type: ClientType,
+      args: {
+        name: { type: GraphQLNonNull(GraphQLString) },
+        email: { type: GraphQLNonNull(GraphQLString) },
+        phone: { type: GraphQLNonNull(GraphQLString) },
+      },
+      resolve(parent, args) {
+        const newClient = new Client({
+          name: args.name,
+          email: args.email,
+          phone: args.phone,
+        });
+
+        return newClient.save();
+      },
+    },
+    //Delete Client
+    deleteClient: {
+      type: ClientType,
+      args: {
+        id: { type: GraphQLNonNull(GraphQLID) },
+      },
+      resolve: (parent, args) => Client.findByIdAndDelete(args.id),
+    },
+  },
+});
+
 export default new GraphQLSchema({
+  description: "Welcome to the Progect managment application",
   query: RootQuery,
+  mutation,
 });
